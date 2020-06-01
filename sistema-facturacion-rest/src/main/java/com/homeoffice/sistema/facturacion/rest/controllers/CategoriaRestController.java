@@ -1,5 +1,6 @@
 package com.homeoffice.sistema.facturacion.rest.controllers;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +97,7 @@ public class CategoriaRestController {
 
 	@PutMapping("/categorias")
 	public ResponseEntity<?> updateCategorias(@Valid @RequestBody CategoriaRequestDto categoriaRequest) {
-		Categoria CategoriaUpdated = null;
+		Categoria categoriaUpdated = null;
 		Map<String, Object> response = new HashMap<>();
 		if (categoriaRequest.getId() == null) {
 			response.put(MENSAJE, "El id no puede ser vacio.");
@@ -109,14 +110,43 @@ public class CategoriaRestController {
 			}
 			try {
 				UtilClassDto.actualizarObjetoCategoria(categoriaRequest, categoriaBdd);
-				CategoriaUpdated = categoriaServicio.guardar(categoriaBdd);
+				categoriaUpdated = categoriaServicio.guardar(categoriaBdd);
 			} catch (DataAccessException e) {
 				response.put(MENSAJE, "Error al actualizar la categoria.");
 				response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 				return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 			response.put(MENSAJE, "La categoria ha sido actualizado con éxito.");
-			response.put(CATEGORY, CategoriaUpdated);
+			response.put(CATEGORY, categoriaUpdated);
+			return new ResponseEntity<>(response, HttpStatus.CREATED);
+		}
+	}
+	
+	@PutMapping("inactivar-categoria/{id}")
+	public ResponseEntity<?> inactivarCategoria(@PathVariable Long id) {
+		Categoria categoriaInactiva = null;
+		Map<String, Object> response = new HashMap<>();
+		if (id == null) {
+			response.put(MENSAJE, "El id no puede ser vacio.");
+			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+		} else {
+			Categoria categoriaBdd = categoriaServicio.buscarPorId(id);
+			if (categoriaBdd == null) {
+				response.put(MENSAJE, "No existe la categoria para el ID enviado.");
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+			}
+			try {
+				categoriaBdd.setEstado(Boolean.FALSE);
+				categoriaBdd.setFechaModificacion(new Date());
+				categoriaBdd.setUsuarioModificacion("admin");
+				categoriaInactiva = categoriaServicio.guardar(categoriaBdd);
+			} catch (DataAccessException e) {
+				response.put(MENSAJE, "Error al inactivar la categoria.");
+				response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+				return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+			response.put(MENSAJE, "La categoria ha sido actualizado con éxito.");
+			response.put(CATEGORY, categoriaInactiva);
 			return new ResponseEntity<>(response, HttpStatus.CREATED);
 		}
 	}

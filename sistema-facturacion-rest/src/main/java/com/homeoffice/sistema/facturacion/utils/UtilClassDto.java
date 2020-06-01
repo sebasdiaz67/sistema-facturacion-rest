@@ -34,11 +34,7 @@ public class UtilClassDto implements Serializable {
 	public static void actualizarObjetoCategoria(CategoriaRequestDto categoriaRequest, Categoria categoriaBdd) {
 		categoriaBdd.setUsuarioModificacion("admin");
 		categoriaBdd.setFechaModificacion(new Date());
-		if (categoriaRequest.getEstado() != null && !categoriaRequest.getEstado()) {
-			categoriaBdd.setEstado(Boolean.FALSE);
-		} else {
-			categoriaBdd.setNombre(categoriaRequest.getNombre());
-			categoriaBdd.setDescripcion(categoriaRequest.getDescripcion());
-		}
+		categoriaBdd.setNombre(categoriaRequest.getNombre());
+		categoriaBdd.setDescripcion(categoriaRequest.getDescripcion());
 	}
 }
